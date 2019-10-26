@@ -6,6 +6,9 @@ from numpy import array
 import pyttsx3
 import speech_recognition as sr
 
+import googlemaps
+from datetime import datetime
+
 # Define dictionary constant
 mapping = {
     ' ': ' ',
@@ -172,8 +175,13 @@ def startup():
     return new_engine
 
 
-def ask_maps(engine_handle):
-    return None
+def ask_maps(engine_handle, client_handle):
+    location = voice_input()["transcription"]
+
+    now = datetime.now()
+    directions = gmaps.directions(location, mode="walking",
+                                         departure_time=now)
+    return directions
 
 
 if __name__ == '__main__':
@@ -182,12 +190,13 @@ if __name__ == '__main__':
     r = sr.Recognizer()
     engine = startup()
     mic = sr.Microphone()
+    gmaps = googlemaps.Client(key=get_key())
 
     tutorial()
 
     engine.say("Where would you like to go?")
     resp = voice_input()
     if resp["transcription"]:
-        ask_maps(engine)
+        instructions = ask_maps(engine, gmaps)
 
     pass
