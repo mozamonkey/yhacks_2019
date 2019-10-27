@@ -6,6 +6,7 @@ from numpy import array
 import pyttsx3
 import speech_recognition as sr
 
+# Modules for navigation/path-finding
 import googlemaps
 from datetime import datetime
 
@@ -140,7 +141,7 @@ def voice_input(microphone, recognizer):
         audio = recognizer.listen(source)
 
     try:
-        response["transcription"] = r.recognize_google(audio)
+        response["transcription"] = recognizer.recognize_google(audio)
     except sr.RequestError:
         response["success"] = False
         response["error"] = "API Unavilable"
@@ -189,7 +190,7 @@ if __name__ == '__main__':
     gmaps = googlemaps.Client(key=get_key())
 
     engine.say("Where would you like to go?")
-    resp = voice_input()
+    resp = voice_input(mic, r)
     if resp["transcription"]:
         instructions = ask_maps(engine, gmaps)
 
