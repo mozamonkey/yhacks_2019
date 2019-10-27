@@ -121,7 +121,7 @@ mapping = {
 
 # Define response variables
 response = {
-    "sucess" : True,
+    "success": True,
     "failure": False,
     "transcription": None
 }
@@ -134,15 +134,15 @@ def get_key():
     return key
 
 
-def voice_input():
-    with mic as source:
-        r.adjust_for_ambient_noise(source)
-        audio = r.listen(source)
+def voice_input(microphone, recognizer):
+    with microphone as source:
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
 
     try:
         response["transcription"] = r.recognize_google(audio)
     except sr.RequestError:
-        response["sucess"] = False
+        response["success"] = False
         response["error"] = "API Unavilable"
     except sr.UnknownValueError:
         response["error"] = "Unable to recognize speech"
@@ -158,11 +158,6 @@ def vibrate(braille_sequence):
     pass
 
 
-def speak(text: str, engine_handle):
-    engine_handle.say(text)
-    pass
-
-
 def tutorial():
     pass
 
@@ -175,12 +170,13 @@ def startup():
     return new_engine
 
 
-def ask_maps(engine_handle, client_handle):
-    location = voice_input()["transcription"]
+def ask_maps(client_handle, microphone, recognizer):
+    location = voice_input(microphone, recognizer)["transcription"]
 
     now = datetime.now()
-    directions = gmaps.directions(location, mode="walking",
-                                         departure_time=now)
+    directions = client_handle.directions(location,
+                                          mode="walking",
+                                          departure_time=now)
     return directions
 
 
@@ -191,8 +187,6 @@ if __name__ == '__main__':
     engine = startup()
     mic = sr.Microphone()
     gmaps = googlemaps.Client(key=get_key())
-
-    tutorial()
 
     engine.say("Where would you like to go?")
     resp = voice_input()
